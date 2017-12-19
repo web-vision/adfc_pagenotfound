@@ -54,7 +54,7 @@ class PageNotFound
      */
     protected function isUnauthorized(array $accessReason)
     {
-        if (isset($accessReason['fe_group'])) {
+        if (isset($accessReason['fe_group']) && $accessReason['fe_group'][''] !== 0) {
             return true;
         }
 
