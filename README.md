@@ -14,6 +14,7 @@ Use this in `AdditionalConfiguration.php` to configure the extension:
         '_DEFAULT' => array(
             'pageNotFound_handling' => 'http://www.tld.dev/index.php?id=257', # insert the SpeakingURL path segment of the error page here
             'pageNotAuthorized_Url' => 'http://www.tld.dev/index.php?id=256', # insert the SpeakingURL path segment of the error page here with login-form
+            'addRedirectParam' => false', #defines whether redirect_url param should be added to redirect string
         ),
         'otherdomain.tld' => array(
             'pageNotFound_handling' => 'http://otherdomain.tld/index.php?id=301', # insert the SpeakingURL path segment of the error page here

@@ -99,20 +99,29 @@ class PageNotFound
     {
         $domainConfiguration = $this->getDomainConfiguration();
         $redirectUrl = $domainConfiguration['pageNotAuthorized_Url'];
+        $addRedirectParam = isset($domainConfiguration['addRedirectParam']) ?
+            $domainConfiguration['addRedirectParam'] :
+            true;
 
         // Prefix with current site url if relative.
         if (substr($redirectUrl, 0, 1) === '/') {
             $redirectUrl = GeneralUtility::getIndpEnv('TYPO3_SITE_URL') . substr($redirectUrl, 1);
         }
 
-        // Use '?' or '&' as concat for parameter
-        if (strpos($redirectUrl, '?') === false) {
-            $redirectUrl .= '?';
-        } else {
-            $redirectUrl .= '&';
+        if ($addRedirectParam) {
+            $redirectParam = 'redirect_url=' . rawurlencode(GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
+
+            // Use '?' or '&' as concat for parameter
+            if (strpos($redirectUrl, '?') === false) {
+                $redirectUrl .= '?';
+            } else {
+                $redirectUrl .= '&';
+            }
+
+            $redirectUrl .= $redirectParam;
         }
 
-        return $redirectUrl . 'redirect_url=' . rawurlencode(GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
+        return $redirectUrl;
     }
 
     /**
