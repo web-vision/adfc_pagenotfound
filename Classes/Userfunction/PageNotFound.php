@@ -38,7 +38,9 @@ class PageNotFound
      */
     public function handle(array &$parameter, TypoScriptFrontendController $parentObject)
     {
-        if ($this->isUnauthorized($parameter['pageAccessFailureReasons'])) {
+        if ($this->isAuthenticatedButNotAuthorized($parameter['pageAccessFailureReasons'])) {
+            return $this->handleUnauthorizedAccess(false);
+        } else if ($this->isUnauthorized($parameter['pageAccessFailureReasons'])) {
             return $this->handleUnauthorizedAccess();
         }
 
@@ -62,15 +64,27 @@ class PageNotFound
     }
 
     /**
+     * Check whether user is logged in, but the page is restricted to another fe group
+     *
+     * @param array $accessReason
+     * @return bool
+     */
+    protected function isAuthenticatedButNotAuthorized(array $accessReason)
+    {
+        return isset($accessReason['fe_group']) && !isset($accessReason['fe_group']['']);
+    }
+
+    /**
      * Handle 401 requests, to pages where access is not allowed.
      *
      * Will redirect to the configured url and exit.
      *
+     * @param bool $addRedirectParam
      * @return void
      */
-    protected function handleUnauthorizedAccess()
+    protected function handleUnauthorizedAccess($addRedirectParam = true)
     {
-        HttpUtility::redirect($this->getRedirectUrlForUnauthorized(), HttpUtility::HTTP_STATUS_401);
+        HttpUtility::redirect($this->getRedirectUrlForUnauthorized($addRedirectParam), HttpUtility::HTTP_STATUS_401);
     }
 
     /**
@@ -93,15 +107,15 @@ class PageNotFound
     /**
      * Generate url for redirect of unauthorized page access.
      *
+     * @param bool $addRedirectParam
      * @return string
      */
-    protected function getRedirectUrlForUnauthorized()
+    protected function getRedirectUrlForUnauthorized($addRedirectParam)
     {
         $domainConfiguration = $this->getDomainConfiguration();
-        $redirectUrl = $domainConfiguration['pageNotAuthorized_Url'];
-        $addRedirectParam = isset($domainConfiguration['addRedirectParam']) ?
-            $domainConfiguration['addRedirectParam'] :
-            true;
+        $redirectUrl = $addRedirectParam ?
+            $domainConfiguration['pageNotAuthorized_Url'] :
+            $domainConfiguration['pageNotAuthenticatedNotAuthorized_Url'];
 
         // Prefix with current site url if relative.
         if (substr($redirectUrl, 0, 1) === '/') {
